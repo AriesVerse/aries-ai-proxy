@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  // 1. Handle CORS preflight (OPTIONS request)
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -7,15 +7,12 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // 2. Only allow POST
   if (req.method !== 'POST') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
-  const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
-
   if (!GROQ_API_KEY) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(500).json({ error: 'API key not configured' });
@@ -30,13 +27,11 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         ...req.body,
-        model: GROQ_MODEL
+        model: 'llama-3.3-70b-versatile'
       })
     });
 
     const data = await response.json();
-    
-    // 3. Add CORS header to response
     res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(200).json(data);
   } catch (error) {
